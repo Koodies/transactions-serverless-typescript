@@ -5,7 +5,19 @@ This project has been generated using the `aws-nodejs-typescript` template from 
 For detailed instructions, please refer to the [documentation](https://www.serverless.com/framework/docs/providers/aws/).
 
 # Table of contents
-[toc]
+- [Serverless - AWS Node.js Typescript](#serverless---aws-nodejs-typescript)
+- [Table of contents](#table-of-contents)
+  - [Installation/deployment instructions](#installationdeployment-instructions)
+    - [Using NPM](#using-npm)
+  - [Test your service](#test-your-service)
+    - [Locally](#locally)
+    - [Remotely via curl](#remotely-via-curl)
+      - [Request](#request)
+      - [Response](#response)
+  - [Template features](#template-features)
+    - [Project structure](#project-structure)
+    - [3rd party libraries](#3rd-party-libraries)
+    - [Advanced usage](#advanced-usage)
 
 ## Installation/deployment instructions
 
@@ -24,13 +36,13 @@ This service contains a single lambda function triggered by an HTTP request made
 
 Payload format
 |Name|Type|Description|
----
+| ------------- | ------ | ------------- |
 |transactions|array|Array with Transaction object|
 
 
 Transaction Object
 |Name|Type|Description|
----
+| ------------- | ------ | ------------- |
 |transactionId|string| Transaction ID|
 |orderId|string| Order ID|
 |merchantId|string| Merchant ID|
