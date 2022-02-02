@@ -7,13 +7,24 @@ export default {
     {
       http: {
         method: 'post',
+        path: 'calculate/{merchantType}',
+        request: {
+          schemas: {
+            'application/json': schema,
+          },
+        },
+      }
+    },
+    {
+      http: {
+        method: 'post',
         path: 'calculate',
         request: {
           schemas: {
             'application/json': schema,
           },
         },
-      },
+      }
     },
   ],
 };
