@@ -14,10 +14,12 @@ interface Transaction {
 
 const calculate: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
     let gross_sales = {}, net_sales = {}, average_order_value = {}
-
+    // Filter by merchantType if queryParameters exists
+    
     // Find gross sales value & net sales value per merchant
     // Gross Sales Value = Grand Total of all sale transactions
     // Net Sales Value = Gross Sales - sales allowances, returns & discounts
+    // Average Order = Gross sales / number of orders
     const mapByMerchantId = groupBy(event.body.transactions, (transaction: Transaction) => transaction.merchantId)
     mapByMerchantId.forEach((transactions: Array<Transaction>, key )=> {
       let gross_sales_value = 0, net_sales_value = 0;
@@ -27,10 +29,8 @@ const calculate: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (even
       });
       gross_sales[key] = gross_sales_value.toFixed(2);
       net_sales[key] = net_sales_value.toFixed(2);
+      average_order_value[key] = (gross_sales_value/getNumberOfOrders(transactions)).toFixed(2);
     })
-
-    // Find average order value per merchant
-    // Average Order = Gross sales / number of orders
 
     return formatJSONResponse({
         gross_sales,
@@ -53,4 +53,14 @@ function groupBy(array, keyGetter) {
        }
   });
   return map;
+}
+
+/**
+ * Map array of transations by orderId and return number of orders
+ * @param  {Array<Transaction>} array
+ * @returns {number}  Number of orders
+ */
+function getNumberOfOrders(array:Array<Transaction>): number {
+  const mapByOrderId = groupBy(array,(transaction: Transaction) => transaction.orderId)
+  return mapByOrderId.size
 }
