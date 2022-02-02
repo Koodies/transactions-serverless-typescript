@@ -4,6 +4,9 @@ This project has been generated using the `aws-nodejs-typescript` template from 
 
 For detailed instructions, please refer to the [documentation](https://www.serverless.com/framework/docs/providers/aws/).
 
+# Table of contents
+[toc]
+
 ## Installation/deployment instructions
 
 Depending on your preferred package manager, follow the instructions below to deploy your project.
@@ -15,40 +18,119 @@ Depending on your preferred package manager, follow the instructions below to de
 - Run `npm i` to install the project dependencies
 - Run `npx sls deploy` to deploy this stack to AWS
 
-### Using Yarn
-
-- Run `yarn` to install the project dependencies
-- Run `yarn sls deploy` to deploy this stack to AWS
-
 ## Test your service
 
-This template contains a single lambda function triggered by an HTTP request made on the provisioned API Gateway REST API `/hello` route with `POST` method. The request body must be provided as `application/json`. The body structure is tested by API Gateway against `src/functions/hello/schema.ts` JSON-Schema definition: it must contain the `name` property.
+This service contains a single lambda function triggered by an HTTP request made on the provisioned API Gateway REST API `/calculate` or `/calculate/{merchantType}` route with `POST` method. The request body must be provided as application/json. The body structure is tested by API Gateway against `src/functions/calculate/schema.ts`
 
-- requesting any other path than `/hello` with any other method than `POST` will result in API Gateway returning a `403` HTTP error code
-- sending a `POST` request to `/hello` with a payload **not** containing a string property named `name` will result in API Gateway returning a `400` HTTP error code
-- sending a `POST` request to `/hello` with a payload containing a string property named `name` will result in API Gateway returning a `200` HTTP status code with a message saluting the provided name and the detailed event processed by the lambda
+Payload format
+|Name|Type|Description|
+---
+|transactions|array|Array with Transaction object|
 
-> :warning: As is, this template, once deployed, opens a **public** endpoint within your AWS account resources. Anybody with the URL can actively execute the API Gateway endpoint and the corresponding lambda. You should protect this endpoint with the authentication method of your choice.
+
+Transaction Object
+|Name|Type|Description|
+---
+|transactionId|string| Transaction ID|
+|orderId|string| Order ID|
+|merchantId|string| Merchant ID|
+|merchantType|string| Merchant Type|
+|value|number| Transaction Cost|
 
 ### Locally
 
-In order to test the hello function locally, run the following command:
+In order to test the calculate function locally, run the following command:
 
-- `npx sls invoke local -f hello --path src/functions/hello/mock.json` if you're using NPM
-- `yarn sls invoke local -f hello --path src/functions/hello/mock.json` if you're using Yarn
+- `npx sls invoke local -f calculate --path src/functions/calculate/mock.json`
 
 Check the [sls invoke local command documentation](https://www.serverless.com/framework/docs/providers/aws/cli-reference/invoke-local/) for more information.
 
-### Remotely
-
-Copy and replace your `url` - found in Serverless `deploy` command output - and `name` parameter in the following `curl` command in your terminal or in Postman to test your newly deployed application.
-
+### Remotely via curl
+#### Request
 ```
-curl --location --request POST 'https://myApiEndpoint/dev/hello' \
+curl --location --request POST 'https://xxxxxx/calculate/type1' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "name": "Frederic"
+    "transactions": [
+        {
+            "transactionId": "tx1",
+            "orderId": "order4",
+            "merchantId": "merchant1",
+            "merchantType": "type1",
+            "value": 999.70
+        },
+        {
+            "transactionId": "tx2",
+            "orderId": "order3",
+            "merchantId": "merchant1",
+            "merchantType": "type1",
+            "value": 999.60
+        },
+        {
+            "transactionId": "tx4",
+            "orderId": "order1",
+            "merchantId": "merchant1",
+            "merchantType": "type3",
+            "value": 999.40
+        },
+        {
+            "transactionId": "tx8",
+            "orderId": "order1",
+            "merchantId": "merchant2",
+            "merchantType": "type1",
+            "value": 123
+        },
+        {
+            "transactionId": "tx9",
+            "orderId": "order1",
+            "merchantId": "merchant2",
+            "merchantType": "type3",
+            "value": -123.30
+        },
+        {
+            "transactionId": "tx11",
+            "orderId": "order3",
+            "merchantId": "merchant2",
+            "merchantType": "type1",
+            "value": 123.101
+        },
+        {
+            "transactionId": "tx12",
+            "orderId": "order1",
+            "merchantId": "merchant3",
+            "merchantType": "type1",
+            "value": -123.50
+        },
+        {
+            "transactionId": "tx13",
+            "orderId": "order1",
+            "merchantId": "merchant3",
+            "merchantType": "type1",
+            "value": 123.00
+        }
+    ]
 }'
+```
+
+#### Response
+```
+{
+    "gross_sales": {
+        "merchant1": "1999.30",
+        "merchant2": "246.10",
+        "merchant3": "123.00"
+    },
+    "net_sales": {
+        "merchant1": "1999.30",
+        "merchant2": "246.10",
+        "merchant3": "-0.50"
+    },
+    "average_order_value": {
+        "merchant1": "999.65",
+        "merchant2": "123.05",
+        "merchant3": "123.00"
+    }
+}
 ```
 
 ## Template features
@@ -64,7 +146,7 @@ The project code base is mainly located within the `src` folder. This folder is 
 .
 ├── src
 │   ├── functions               # Lambda configuration and source code folder
-│   │   ├── hello
+│   │   ├── calculate
 │   │   │   ├── handler.ts      # `Hello` lambda source code
 │   │   │   ├── index.ts        # `Hello` lambda Serverless configuration
 │   │   │   ├── mock.json       # `Hello` lambda input parameter, if any, for local invocation
