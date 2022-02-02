@@ -3,7 +3,7 @@ export default {
   properties: {
     transactions: {
       type: "array",
-      transaction: {
+      items: {
         type: "object",
         properties: {
           transactionId: { type: 'string' },
@@ -15,5 +15,5 @@ export default {
       }
     }
   },
-  required: ['transactionId','orderId','merchantId','merchantType','value']
+  required: ['transactions']
 } as const;
