@@ -13,20 +13,20 @@ interface Transaction {
 }
 
 const calculate: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (event) => {
-    const transactions: Array<Transaction> = event.body.transactions;
     let gross_sales = {}, net_sales = {}, average_order_value = {}
 
     // Find gross sales value & net sales value per merchant
     // Gross Sales Value = Grand Total of all sale transactions
     // Net Sales Value = Gross Sales - sales allowances, returns & discounts
-    transactions.forEach((transaction: Transaction): void => {
-        if (!gross_sales[transaction.merchantId]) {
-            if (transaction.value > 0) gross_sales[transaction.merchantId] = transaction.value;
-            net_sales[transaction.merchantId] = transaction.value;
-        } else {
-            if (transaction.value > 0) gross_sales[transaction.merchantId] = gross_sales[transaction.merchantId] + transaction.value;
-            net_sales[transaction.merchantId] = net_sales[transaction.merchantId] + transaction.value;
-        }
+    const mapByMerchantId = groupBy(event.body.transactions, (transaction: Transaction) => transaction.merchantId)
+    mapByMerchantId.forEach((transactions: Array<Transaction>, key )=> {
+      let gross_sales_value = 0, net_sales_value = 0;
+      transactions.forEach((transaction:Transaction) => {
+        if(transaction.value > 0) gross_sales_value += transaction.value;
+        net_sales_value += transaction.value;
+      });
+      gross_sales[key] = gross_sales_value.toFixed(2);
+      net_sales[key] = net_sales_value.toFixed(2);
     })
 
     // Find average order value per merchant
@@ -40,3 +40,17 @@ const calculate: ValidatedEventAPIGatewayProxyEvent<typeof schema> = async (even
 };
 
 export const main = middyfy(calculate);
+
+function groupBy(array, keyGetter) {
+  const map = new Map();
+  array.forEach((item) => {
+       const key = keyGetter(item);
+       const collection = map.get(key);
+       if (!collection) {
+           map.set(key, [item]);
+       } else {
+           collection.push(item);
+       }
+  });
+  return map;
+}
