@@ -110,6 +110,9 @@ dist
 # Serverless directories
 .serverless/
 
+# Serverless build directories
+.esbuild/
+
 # FuseBox cache
 .fusebox/
 
